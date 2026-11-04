@@ -61,6 +61,11 @@ def format_q3_experiment_output(
     for r in mt_rounds:
         fib_str = ", ".join(f"Fib({w.n})={w.result}" for w in r.workers)
         lines.append(f"Round {r.round_number:>2}: {fib_str} | T = {r.elapsed_ns:>10,d} ns")
+        for w in r.workers:
+            s_off = w.start_time_ns - r.t1_first_started_ns
+            e_off = w.end_time_ns - r.t1_first_started_ns
+            lines.append(
+                f"   -> {w.thread_name}: start=+{s_off:,d} ns, end=+{e_off:,d} ns, duration={w.thread_duration_ns:,d} ns")
     lines.append(f"Average T (With Multithreading)    : {round(mt_avg_ns):,d} ns")
     lines.append("")
     lines.append("=== Fibonacci Computation (Without Multithreading - Sequential) ===")
