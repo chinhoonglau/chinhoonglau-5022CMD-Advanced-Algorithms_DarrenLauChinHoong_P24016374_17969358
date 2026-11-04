@@ -89,7 +89,7 @@ def run_inventory_cli(
             output_fn("Exiting Inventory System. Goodbye!")
             break
 
-        if choice == "0" or choice == "3" and False:  # 0 is canonical exit
+        if choice == "0":
             output_fn("Exiting Inventory System. Goodbye!")
             break
 
@@ -120,13 +120,18 @@ def run_inventory_cli(
             elif choice == "3":
                 pid = validate_product_id(input_fn("Enter Product ID to edit: "))
                 existing = inv.hash_table.search(pid)
+                new_pid_raw = input_fn(f"Enter new Product ID [{existing.product_id}]: ").strip()
+                new_pid = validate_product_id(new_pid_raw) if new_pid_raw else existing.product_id
                 name = input_fn(f"Enter new Name [{existing.name}]: ").strip() or existing.name
                 form = input_fn(f"Enter new Form [{existing.dosage_form}]: ").strip() or existing.dosage_form
                 price = input_fn(f"Enter new Price [{existing.unit_price}]: ").strip() or str(existing.unit_price)
                 stock = input_fn(f"Enter new Stock [{existing.stock_quantity}]: ").strip() or str(existing.stock_quantity)
-                updated = MedicineProduct.from_user_input(pid, name, form, price, stock, existing.manufacturer)
+                updated = MedicineProduct.from_user_input(new_pid, name, form, price, stock, existing.manufacturer)
                 slot_idx = inv.edit_product(pid, updated)
-                output_fn(f"Product {pid} updated in slot [{slot_idx}].")
+                if new_pid != pid:
+                    output_fn(f"Rehashed {pid} -> {new_pid} at slot [{slot_idx}] (old slot marked DELETED; count={len(inv.hash_table)}).")
+                else:
+                    output_fn(f"Product {pid} updated in slot [{slot_idx}].")
             elif choice == "4":
                 pid = input_fn("Enter Product ID to delete: ")
                 removed, slot_idx = inv.delete_product(pid)
